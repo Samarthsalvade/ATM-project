@@ -43,6 +43,16 @@ class AccountDatabase {
         pstmt.setInt(1, account_no);
         pstmt.executeUpdate();
     }
+    //Method to retrieve data from database
+    public ResultSet getRecord(int account_no, int pin) throws SQLException {
+        String sql = "SELECT * FROM Account WHERE account_no=? AND pin=?";
+        PreparedStatement pstmt = conn.prepareStatement(sql);
+        pstmt.setInt(1, account_no);
+        pstmt.setInt(2, pin);
+        ResultSet rs = pstmt.executeQuery();
+        return rs;
+    }
+    
 
     // Method to update a record in the Account table by account_no
     public void updateRecord(int account_no, String name, float balance, int pin, String info) throws SQLException {
@@ -59,23 +69,44 @@ class AccountDatabase {
 
 
 class ATMsimulation{
-    public static void main(String[] args) {
-        try {
-            // Create a new AccountDatabase object
-            AccountDatabase db = new AccountDatabase("jdbc:mysql://localhost:3306/mydb", "root", "root");
+    public static void main(String[] args) { 
+        try { 
+            // Create a new AccountDatabase object 
+            AccountDatabase db = new AccountDatabase("jdbc:mysql://localhost:3306/mydb", "root", "root"); 
     
-            // Add a new record to the Account table
-            db.addRecord(123456789, "John Doe", 1000.0f, 1234, "Some info");
-            db.addRecord(123456790, "Johny Doey", 1009.0f, 1134, "ome info");
+            // Add a new record to the Account table 
+            db.addRecord(123456789, "John Doe", 1000.0f, 1234, "Some info"); 
+            db.addRecord(123456790, "Johny Doey", 1009.0f, 1134, "ome info"); 
     
-            // Update the record with account_no=123456789
-            db.updateRecord(123456789, "Jane Doe", 2000.0f, 5678, "Updated info");
+            // Retrieve the record with account_no=123456789 and pin=1234
+            ResultSet rs = db.getRecord(123456789, 1234);
+            if (rs.next()) {
+                // The record exists, so we can retrieve its values
+                int account_no = rs.getInt("account_no");
+                String name = rs.getString("name");
+                float balance = rs.getFloat("balance");
+                int pin = rs.getInt("pin");
+                String info = rs.getString("info");
+                System.out.println("Account details: ");
+                System.out.println("Account no: " + account_no);
+                System.out.println("Name: " + name);
+                System.out.println("Balance: " + balance);
+                System.out.println("PIN: " + pin);
+                System.out.println("Info: " + info);
+            } else {
+                // The record doesn't exist, so we can notify the user
+                System.out.println("Invalid account no or PIN");
+            }
     
-            // Delete the record with account_no=123456789
-            db.deleteRecord(123456789);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+            // Update the record with account_no=123456789 
+            db.updateRecord(123456789, "Jane Doe", 2000.0f, 5678, "Updated info"); 
+    
+            // Delete the record with account_no=123456789 
+            db.deleteRecord(123456789); 
+        } catch (SQLException e) { 
+            e.printStackTrace(); 
+        } 
     }
+    
     
 }
